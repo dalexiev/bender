@@ -93,9 +93,9 @@ and execute searches. Like all other commands, the Query provides a natural and 
 for building complex selections using `Predicate`s and combining them using logical operators.
 
 ```java
-EntityCursor<Entity> cursor =  mBuilder.query(Entity.class, contentResolver)
+EntityCursor<Entity> cursor =  mBuilder.query(contentResolver, Entity.class)
                                         .onUri(<yourUri>)
-                                        .projection("column1", "column2")
+                                        .select("column1", "column2")
                                         .where(eq("foo", "bar"))
                                         .orWhere(gt("baz", "10"))
                                         .useRowMapper(new RowMapper<Entity>(){..})
