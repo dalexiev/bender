@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Bender</string>
+    <string name="appName">ToDo - Bender Sample</string>
+
+    <string name="toDoListEmptyText">Nothing To Do</string>
 </resources>
