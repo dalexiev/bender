@@ -1,6 +1,7 @@
 package bg.dalexiev.bender;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.LoaderManager;
@@ -12,14 +13,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
+
 import bg.dalexiev.bender.content.EntityCursor;
+import bg.dalexiev.bender.content.InsertCommand;
 import bg.dalexiev.bender.content.QueryCommand;
 import bg.dalexiev.bender.content.ResolverCommandBuilder;
 import bg.dalexiev.bender.content.SupportEntityCursorLoader;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, AddToDoDialog.Listener,
+        InsertCommand.Callback {
 
     private static final int LOAD_TO_DO_LIST = 1;
+
+    private static final int INSERT_TODO = 2;
 
     private ToDoAdapter mAdapter;
 
@@ -58,7 +66,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onAddButtonClick() {
-        Toast.makeText(this, "Add To Do", Toast.LENGTH_LONG).show();
+        final AddToDoDialog dialog = AddToDoDialog.newInstance(this);
+        dialog.show(getSupportFragmentManager(), AddToDoDialog.TAG);
+    }
+
+    @Override
+    public void onToDoTitleEntered(String toDo) {
+        mBuilder.insert(getContentResolver())
+                .onUri(Schema.ToDo.URL)
+                .set(Schema.ToDo.TITLE, toDo)
+                .set(Schema.ToDo.CREATION_DATE, Calendar.getInstance().getTimeInMillis())
+                .set(Schema.ToDo.IS_DONE, 0)
+                .executeAsync(INSERT_TODO, this);
+    }
+
+    @Override
+    public void onInsertComplete(int token, Uri uri) {
+        if (INSERT_TODO == token) {
+            Toast.makeText(this, "To Do inserted", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private class HandleLoad implements LoaderManager.LoaderCallbacks<EntityCursor<ToDoModel>> {
