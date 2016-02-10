@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">Bender</string>
+    <string name="appName">ToDo - Bender Sample</string>
+
+    <string name="toDoListEmptyText">Nothing ToDo</string>
+
+    <string name="addDialogTitle">Add ToDo</string>
+    <string name="addDialogPositiveButton">Add</string>
+    <string name="addDialogNegativeButton">Cancel</string>
+
+    <string name="actionCheck">Check</string>
+    <string name="actionDelete">Delete</string>
 </resources>
