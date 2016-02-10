@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/actionBarSize"
-        app:theme="@style/ToolbarTheme" />
+        app:theme="@style/ToolbarTheme"/>
 
     <ListView
         android:id="@+id/toDoList"
-        android:layout_below="@id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_below="@id/toolbar"/>
 
     <TextView
         android:id="@+id/toDoListEmptyText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/toDoListEmptyText"
         android:layout_centerInParent="true"
+        android:text="@string/toDoListEmptyText"
         android:visibility="gone"/>
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/toDoAddButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_menu_add"
-        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="32dp"
         android:layout_marginRight="32dp"
-        android:layout_marginBottom="32dp"/>
+        android:src="@android:drawable/ic_menu_add"/>
 
 </RelativeLayout>

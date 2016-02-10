@@ -13,8 +13,6 @@ public class AddToDoDialog extends DialogFragment {
 
     public static final String TAG = "addToDoDialog";
 
-    private EditText mToDoEditText;
-
     private Listener mListener;
 
     public static AddToDoDialog newInstance(Listener listener) {
@@ -26,14 +24,15 @@ public class AddToDoDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        mToDoEditText = new EditText(getActivity());
+        final EditText toDoEditText = new EditText(getActivity());
+        
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.addDialogTitle)
-                .setView(mToDoEditText)
+                .setView(toDoEditText)
                 .setPositiveButton(R.string.addDialogPositiveButton, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        final String text = mToDoEditText.getText().toString();
+                        final String text = toDoEditText.getText().toString();
                         if (!TextUtils.isEmpty(text)) {
                             mListener.onToDoTitleEntered(text);
                             dismiss();
