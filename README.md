@@ -93,13 +93,13 @@ and execute searches. Like all other commands, the Query provides a natural and 
 for building complex selections using `Predicate`s and combining them using logical operators.
 
 ```java
-EntityCursor<Entity> cursor =  mBuilder.query(contentResolver, Entity.class)
-                                        .onUri(<yourUri>)
-                                        .select("column1", "column2")
-                                        .where(eq("foo", "bar"))
-                                        .orWhere(gt("baz", "10"))
-                                        .useRowMapper(new RowMapper<Entity>(){..})
-                                        .executeAsync(token, callback);
+mBuilder.query(contentResolver, Entity.class)
+        .onUri(<yourUri>)
+        .select("column1", "column2")
+        .where(eq("foo", "bar"))
+        .orWhere(gt("baz", "10"))
+        .useRowMapper(new RowMapper<Entity>(){..})
+        .executeAsync(token, callback);
 ```
 The result of a Query is an `EntityCursor`. This is a special kind of cursor, capable of transforming database rows into
 instances of a specific class.
@@ -116,5 +116,10 @@ If you want, you can use the provided `EntityCursorLoader` and `SupportEntityCur
 through the Loader mechanism, provided by the Android platform.
 
 ## Distribution
-To use the library download the source code and include it as a module to your project.
-It will be uploaded to a Maven Repository as soon as possible.
+Bender is available on the `jcenter()` maven repo.
+Use the following snipped to add it as a Gradle dependency:
+
+```
+compile 'bg.dalexiev:bender:1.1'
+
+```
