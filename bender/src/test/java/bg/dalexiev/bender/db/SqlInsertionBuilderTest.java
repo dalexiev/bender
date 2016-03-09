@@ -25,7 +25,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -63,7 +62,7 @@ public class SqlInsertionBuilderTest {
 
         mTested.setTable("test").appendValues(contentValues);
 
-        final String sql = mTested.generateSql();
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_NONE);
 
         assertEquals("insert into test(foo) values (?)", sql);
     }
@@ -74,7 +73,7 @@ public class SqlInsertionBuilderTest {
 
         mTested.setTable("test").appendValues(contentValues);
 
-        final String sql = mTested.generateSql();
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_NONE);
 
         final StringBuilder columnBuilder = new StringBuilder();
         for (String column : contentValues.keySet()) {
@@ -88,9 +87,74 @@ public class SqlInsertionBuilderTest {
     public void shouldInsertEmptyRow() {
         mTested.setTable("test").appendValues((ContentValues) null);
 
-        final String sql = mTested.generateSql();
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_NONE);
 
         assertEquals("insert into test(_id) values (?)", sql);
+    }
+
+    @Test
+    public void shouldInsertOrAbort() {
+        final ContentValues contentValues = mock(ContentValues.class);
+        doReturn(Collections.singleton("foo")).when(contentValues).keySet();
+        doReturn(1).when(contentValues).size();
+
+        mTested.setTable("test").appendValues(contentValues);
+
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_ABORT);
+
+        assertEquals("insert or abort into test(foo) values (?)", sql);
+    }
+
+    @Test
+    public void shouldInsertOrFail() {
+        final ContentValues contentValues = mock(ContentValues.class);
+        doReturn(Collections.singleton("foo")).when(contentValues).keySet();
+        doReturn(1).when(contentValues).size();
+
+        mTested.setTable("test").appendValues(contentValues);
+
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_FAIL);
+
+        assertEquals("insert or fail into test(foo) values (?)", sql);
+    }
+
+    @Test
+    public void shouldInsertOrRollback() {
+        final ContentValues contentValues = mock(ContentValues.class);
+        doReturn(Collections.singleton("foo")).when(contentValues).keySet();
+        doReturn(1).when(contentValues).size();
+
+        mTested.setTable("test").appendValues(contentValues);
+
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_ROLLBACK);
+
+        assertEquals("insert or rollback into test(foo) values (?)", sql);
+    }
+
+    @Test
+    public void shouldInsertOrReplace() {
+        final ContentValues contentValues = mock(ContentValues.class);
+        doReturn(Collections.singleton("foo")).when(contentValues).keySet();
+        doReturn(1).when(contentValues).size();
+
+        mTested.setTable("test").appendValues(contentValues);
+
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_REPLACE);
+
+        assertEquals("insert or replace into test(foo) values (?)", sql);
+    }
+
+    @Test
+    public void shouldInsertOrIgnore() {
+        final ContentValues contentValues = mock(ContentValues.class);
+        doReturn(Collections.singleton("foo")).when(contentValues).keySet();
+        doReturn(1).when(contentValues).size();
+
+        mTested.setTable("test").appendValues(contentValues);
+
+        final String sql = mTested.generateSql(SQLiteDatabase.CONFLICT_IGNORE);
+
+        assertEquals("insert or ignore into test(foo) values (?)", sql);
     }
 
     @Test(expected = IllegalArgumentException.class)
