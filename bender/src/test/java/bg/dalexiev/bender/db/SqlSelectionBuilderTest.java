@@ -285,14 +285,44 @@ public class SqlSelectionBuilderTest {
 
     @Test
     public void shouldPerformUpdate() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_NONE);
+    }
+
+    @Test
+    public void shouldPerformUpdateOrFail() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_FAIL);
+    }
+
+    @Test
+    public void shouldPerformUpdateOrAbort() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_ABORT);
+    }
+
+    @Test
+    public void shouldPerformUpdateOrRollback() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_ROLLBACK);
+    }
+
+    @Test
+    public void shouldPerformUpdateOrIgnore() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
+    @Test
+    public void shouldPerformUpdateOrReplace() {
+        shouldUpdate(SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    private void shouldUpdate(int conflictAlgorithm) {
         final String table = "test";
 
         final ContentValues values = mock(ContentValues.class);
         doReturn(1).when(values).size();
 
-        mTested.setTable(table).update(mDatabase, values);
+        mTested.setTable(table).update(mDatabase, values, conflictAlgorithm);
 
-        verify(mDatabase).update(eq(table), eq(values), isNull(String.class), isNull(String[].class));
+        verify(mDatabase).updateWithOnConflict(eq(table), eq(values), isNull(String.class), isNull(String[].class),
+                eq(conflictAlgorithm));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -365,8 +395,9 @@ public class SqlSelectionBuilderTest {
 
         mTested.setTable(table).query(mDatabase, null);
 
-        verify(mDatabase).query(eq(false), eq(table), isNull(String[].class), isNull(String.class), isNull(String[].class),
-                isNull(String.class), isNull(String.class), isNull(String.class), isNull(String.class));
+        verify(mDatabase)
+                .query(eq(false), eq(table), isNull(String[].class), isNull(String.class), isNull(String[].class),
+                        isNull(String.class), isNull(String.class), isNull(String.class), isNull(String.class));
     }
 
     @Test(expected = IllegalArgumentException.class)

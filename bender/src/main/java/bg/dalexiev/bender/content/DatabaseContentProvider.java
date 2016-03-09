@@ -39,7 +39,6 @@ import bg.dalexiev.bender.util.Preconditions;
  * </dl>
  * Optionally, a subclass may provide a custom {@link DatabaseUriMatcher} to deal with custom content URIs.
  *
- *
  * @author danail.alexiev
  * @see ContentProvider
  * @see SQLiteOpenHelper
@@ -47,6 +46,20 @@ import bg.dalexiev.bender.util.Preconditions;
  * @since 1.0
  */
 public abstract class DatabaseContentProvider extends ContentProvider {
+
+    /**
+     * Used to specify the conflict resolution algorithm to be used while performing the database operation.
+     * Only taken into consideration when inserting or updating.
+     *
+     * <p>Supported values: {@link SQLiteDatabase#CONFLICT_NONE}, {@link SQLiteDatabase#CONFLICT_ROLLBACK}, {@link
+     * SQLiteDatabase#CONFLICT_ABORT}, {@link SQLiteDatabase#CONFLICT_REPLACE}, {@link SQLiteDatabase#CONFLICT_IGNORE},
+     * {@link SQLiteDatabase#CONFLICT_FAIL}.
+     *
+     * <p>Defaults to {@link SQLiteDatabase#CONFLICT_NONE}. All unknown values are replaced by the default value.
+     *
+     * @since 1.1.1
+     */
+    public static final String PARAM_CONFLICT_ALGORITHM = "onConflict";
 
     private String mAuthority;
     private SQLiteOpenHelper mHelper;
@@ -210,7 +223,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
 
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         final SqlInsertionBuilder builder = buildInsertion(uri, match, values);
-        final List<Long> generatedIds = builder.insert(db);
+        final int conflictAlgorithm = getConflictAlgorithm(uri);
+        final List<Long> generatedIds = builder.insert(db, conflictAlgorithm);
         notifyChange(uri);
         return ContentUris.withAppendedId(uri, generatedIds.get(0));
     }
@@ -234,7 +248,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
         try {
             db.beginTransaction();
             final SqlInsertionBuilder builder = buildInsertion(uri, match, values);
-            final List<Long> generatedIds = builder.insert(db);
+            final int conflictAlgorithm = getConflictAlgorithm(uri);
+            final List<Long> generatedIds = builder.insert(db, conflictAlgorithm);
             notifyChange(uri);
             db.setTransactionSuccessful();
             return generatedIds.size();
@@ -317,7 +332,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
 
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         final SqlSelectionBuilder builder = buildUpdateDeleteSelection(uri, match, selection, selectionArgs);
-        final int updatedRows = builder.update(db, values);
+        final int conflictAlgorithm = getConflictAlgorithm(uri);
+        final int updatedRows = builder.update(db, values, conflictAlgorithm);
         notifyChange(uri);
         return updatedRows;
     }
@@ -395,6 +411,15 @@ public abstract class DatabaseContentProvider extends ContentProvider {
         if (context != null) {
             context.getContentResolver().notifyChange(uri, null);
         }
+    }
+
+    private static int getConflictAlgorithm(Uri uri) {
+        final String onConflict = uri.getQueryParameter(PARAM_CONFLICT_ALGORITHM);
+        if (onConflict == null) {
+            return SQLiteDatabase.CONFLICT_NONE;
+        }
+
+        return Integer.parseInt(onConflict);
     }
 
 }

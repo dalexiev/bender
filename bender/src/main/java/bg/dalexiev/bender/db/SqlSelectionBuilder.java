@@ -42,11 +42,12 @@ public class SqlSelectionBuilder {
 
     /**
      * Sets the table to perform operations on.
-     * <p>This method must be called before trying to perform any operations using {@link #delete(SQLiteDatabase)}, {@link #update(SQLiteDatabase, ContentValues)} or {@link #query(SQLiteDatabase, String[])}</p>
+     * <p>This method must be called before trying to perform any operations using {@link #delete(SQLiteDatabase)},
+     * {@link #update(SQLiteDatabase, ContentValues)} or {@link #query(SQLiteDatabase, String[])}</p>
      *
      * @param table required. The named of the database table ot operate on.
-     * @throws IllegalArgumentException if {@code table} is {@code null}
      * @return the current instance
+     * @throws IllegalArgumentException if {@code table} is {@code null}
      * @since 1.0
      */
     @NonNull
@@ -59,7 +60,8 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Specifies that this selection will target only distinct results. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Specifies that this selection will target only distinct results. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
      *
      * @return the current instance
      * @since 1.0
@@ -72,14 +74,15 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new expression will be added using the {@code AND} logical operator.
+     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new
+     * expression will be added using the {@code AND} logical operator.
      *
      * <p>
      * The resulting expression will be the following: {@code [existing where AND] (selection) }
      * </p>
      *
      * @param selection optional. The expression to be added to the where clause.
-     * @param args optional. The values to be bound to the expression parameters on execution.
+     * @param args      optional. The values to be bound to the expression parameters on execution.
      * @return the current instance
      * @since 1.0
      */
@@ -91,7 +94,8 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new expression will be added using the {@code AND} logical operator.
+     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new
+     * expression will be added using the {@code AND} logical operator.
      *
      * <p>
      * The resulting expression will be the following: {@code [existing where AND] (predicate expression) }
@@ -112,14 +116,15 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new expression will be added using the {@code OR} logical operator.
+     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new
+     * expression will be added using the {@code OR} logical operator.
      *
      * <p>
      * The resulting expression will be the following: {@code [existing where OR] (selection) }
      * </p>
      *
      * @param selection optional. The expression to be added to the where clause.
-     * @param args optional. The values to be bound to the expression parameters on execution.
+     * @param args      optional. The values to be bound to the expression parameters on execution.
      * @return the current instance
      * @since 1.0
      */
@@ -131,7 +136,8 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new expression will be added using the {@code OR} logical operator.
+     * Appends an expression to the existing where clause of this selection. If a where clause already exists, the new
+     * expression will be added using the {@code OR} logical operator.
      *
      * <p>
      * The resulting expression will be the following: {@code [existing where OR] (predicate expression) }
@@ -179,7 +185,9 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Adds a {@code groupBy} clause to this selection. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Adds a {@code groupBy} clause to this selection. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
+     *
      * @param columns optional. A list of columns to be used in the {@code groupBy} clause
      * @return the current instance
      * @since 1.0
@@ -208,7 +216,9 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Adds a {@code having} clause to this selection. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Adds a {@code having} clause to this selection. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
+     *
      * @param having optional. A list of columns to be used in the {@code groupBy} clause
      * @return the current instance
      * @since 1.0
@@ -221,7 +231,9 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Adds a {@code orderBy} clause to this selection. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Adds a {@code orderBy} clause to this selection. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
+     *
      * @param orderBy optional. The expression to add ot the {@code groupBy} clause
      * @return the current instance
      * @since 1.0
@@ -234,7 +246,9 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Adds a {@code orderBy} clause to this selection. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Adds a {@code orderBy} clause to this selection. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
+     *
      * @param orderBy required. A list of orderBy expression to add to the {@code groupBy} clause
      * @return the current instance
      * @throws IllegalArgumentException if {@code orderBy} is {@code null} or empty
@@ -265,7 +279,9 @@ public class SqlSelectionBuilder {
     }
 
     /**
-     * Adds a {@code limit} clause to this selection. Has effect only when used together with {@link #query(SQLiteDatabase, String[])}.
+     * Adds a {@code limit} clause to this selection. Has effect only when used together with {@link
+     * #query(SQLiteDatabase, String[])}.
+     *
      * @param limit optional. The expression to use as a {@code limit} clause
      * @return the current instance
      * @throws IllegalArgumentException if {@code limit} is {@code null}
@@ -283,30 +299,36 @@ public class SqlSelectionBuilder {
     /**
      * Performs a database update, applying the current {@code where} clause.
      *
-     * @param db required. The database to perform the update against.
+     * @param db     required. The database to perform the update against.
      * @param values required. The values to use for the update.
-     * @throws IllegalArgumentException if {@code db} or {@code values} is {@code null}, or if {@code values} is empty.
-     * @throws IllegalStateException @throws IllegalStateException if a table has not been set by calling {@link #setTable(String)} before trying to update.
      * @return the number of updated rows.
+     * @throws IllegalArgumentException if {@code db} or {@code values} is {@code null}, or if {@code values} is empty.
+     * @throws IllegalStateException    @throws IllegalStateException if a table has not been set by calling {@link
+     *                                  #setTable(String)} before trying to update.
      * @since 1.0
      */
     public int update(@NonNull SQLiteDatabase db, @NonNull ContentValues values) {
+        return update(db, values, SQLiteDatabase.CONFLICT_NONE);
+    }
+
+    public int update(@NonNull SQLiteDatabase db, @NonNull ContentValues values, int conflictAlgorithm) {
         Preconditions.argumentNotNull(db, "Database can't be null");
         Preconditions.argumentNotNull(values, "Update values can't be null");
         Preconditions.argumentCondition(values.size() == 0, "Update values can't be empty");
 
         Preconditions.stateNotNull(mTable, "Can't execute an update with no table set. Did you call setTable()?");
 
-        return db.update(mTable, values, getSelection(), getSelectionArgs());
+        return db.updateWithOnConflict(mTable, values, getSelection(), getSelectionArgs(), conflictAlgorithm);
     }
 
     /**
      * Performs a database delete, applying the current {@code where} clause.
      *
      * @param db required. The database to perform the delete against.
-     * @throws IllegalArgumentException if {@code db} is {@code null}.
-     * @throws IllegalStateException if a table has not been set by calling {@link #setTable(String)} before trying to delete.
      * @return the number of deleted rows.
+     * @throws IllegalArgumentException if {@code db} is {@code null}.
+     * @throws IllegalStateException    if a table has not been set by calling {@link #setTable(String)} before trying
+     *                                  to delete.
      * @since 1.0
      */
     public int delete(@NonNull SQLiteDatabase db) {
@@ -320,13 +342,14 @@ public class SqlSelectionBuilder {
     /**
      * Perform a database query, applying the current state of this instance.
      *
-     * @see Cursor
-     *
-     * @param db required. The database to query against.
-     * @param projection optional. The columns to fetch in the result set. Passing {@code null} here is discouraged, since it <em>will</em> have performance implications.
-     * @throws IllegalArgumentException if {@code db} is {@code null}.
-     * @throws IllegalStateException if a table has not been set by calling {@link #setTable(String)} before trying to query.
+     * @param db         required. The database to query against.
+     * @param projection optional. The columns to fetch in the result set. Passing {@code null} here is discouraged,
+     *                   since it <em>will</em> have performance implications.
      * @return a cursor holding the query result set.
+     * @throws IllegalArgumentException if {@code db} is {@code null}.
+     * @throws IllegalStateException    if a table has not been set by calling {@link #setTable(String)} before trying
+     *                                  to query.
+     * @see Cursor
      */
     @Nullable
     public Cursor query(@NonNull SQLiteDatabase db, @Nullable String[] projection) {
