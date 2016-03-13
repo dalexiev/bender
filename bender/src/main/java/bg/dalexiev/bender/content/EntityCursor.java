@@ -26,6 +26,8 @@ public class EntityCursor<E> extends CursorWrapper {
     EntityCursor(Cursor cursor, CursorMapper<E> cursorMapper) {
         super(cursor);
         mCursorMapper = cursorMapper;
+
+        mPosition = -1;
     }
 
     EntityCursor(Cursor cursor, RowMapper<E> rowMapper) {
@@ -39,16 +41,15 @@ public class EntityCursor<E> extends CursorWrapper {
         }
 
         mCache = mCursorMapper.mapCursor(cursor);
-        cursor.moveToPosition(0);
+        cursor.moveToFirst();
     }
 
     public E getEntity() {
-        if ((-1 >= mPosition) || (getCount() <= mPosition)) {
-            throw new CursorIndexOutOfBoundsException("Invalid cursor position " + mPosition);
+        if ((0 > mPosition) || (mPosition >= getCount())) {
+            throw new CursorIndexOutOfBoundsException("Invalid cursor position: " + mPosition);
         }
 
-        final E entity = mCache.get(mPosition);
-        return entity;
+        return mCache.get(mPosition);
     }
 
     @Override
@@ -66,28 +67,33 @@ public class EntityCursor<E> extends CursorWrapper {
     }
 
     @Override
-    public boolean move(int offset) {
-        final int newPosition = mPosition + offset;
-        if (newPosition > getCount()) {
+    public boolean moveToPosition(int position) {
+        if (position >= getCount()) {
             mPosition = getCount();
             return false;
-        } else if (-1 > newPosition) {
+        }
+
+        if (position < 0) {
             mPosition = -1;
             return false;
-        } else {
-            mPosition = newPosition;
-            return true;
         }
-    }
 
-    @Override
-    public boolean moveToPosition(int position) {
-        if ((-1 > position) || (getCount() < position)) {
-            return false;
+        if (position == mPosition) {
+            return true;
         }
 
         mPosition = position;
         return true;
+    }
+
+    @Override
+    public boolean moveToFirst() {
+        return moveToPosition(0);
+    }
+
+    @Override
+    public boolean moveToLast() {
+        return moveToPosition(getCount() - 1);
     }
 
     @Override
@@ -101,32 +107,42 @@ public class EntityCursor<E> extends CursorWrapper {
     }
 
     @Override
-    public boolean moveToLast() {
-        return moveToPosition(getCount() - 1);
-    }
+    public boolean move(int offset) {
+        final int newPosition = mPosition + offset;
+        if (offset < 0) {
+            mPosition = Math.max(-1, newPosition);
+        } else {
+            mPosition = Math.min(getCount(), newPosition);
+        }
 
-    @Override
-    public boolean moveToFirst() {
-        return moveToPosition(0);
-    }
-
-    @Override
-    public boolean isLast() {
-        return mPosition == getCount() - 1;
-    }
-
-    @Override
-    public boolean isFirst() {
-        return mPosition == 0;
-    }
-
-    @Override
-    public boolean isAfterLast() {
-        return mPosition >= getCount();
+        return mPosition == newPosition;
     }
 
     @Override
     public boolean isBeforeFirst() {
-        return mPosition <= -1;
+        return -1 == mPosition;
+    }
+
+    @Override
+    public boolean isAfterLast() {
+        return getCount() == mPosition;
+    }
+
+    @Override
+    public boolean isFirst() {
+        return 0 == mPosition;
+    }
+
+    @Override
+    public boolean isLast() {
+        return (getCount() - 1) == mPosition;
+    }
+
+    @Override
+    public void close() {
+        super.close();
+        if (mCache != null) {
+            mCache.clear();
+        }
     }
 }
