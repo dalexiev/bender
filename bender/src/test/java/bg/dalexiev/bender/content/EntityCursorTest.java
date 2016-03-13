@@ -88,6 +88,10 @@ public class EntityCursorTest {
 
         mTested.mapCursor();
 
+        if (!mTested.moveToFirst()) {
+            throw new AssertionError("Cursor empty");
+        }
+
         ResolverCommandTestBase.MockEntity actualEntity = mTested.getEntity();
 
         assertEquals(mockEntity, actualEntity);
@@ -135,7 +139,7 @@ public class EntityCursorTest {
         final boolean fullSuccess = mTested.move(1);
 
         assertTrue(fullSuccess);
-        assertEquals(1, mTested.getPosition());
+        assertEquals(0, mTested.getPosition());
     }
 
     @Test
@@ -145,7 +149,7 @@ public class EntityCursorTest {
         final boolean success = mTested.moveToPosition(-5);
 
         assertFalse(success);
-        assertEquals(0, mTested.getPosition());
+        assertEquals(-1, mTested.getPosition());
     }
 
     @Test
@@ -155,7 +159,7 @@ public class EntityCursorTest {
         final boolean success = mTested.moveToPosition(5);
 
         assertFalse(success);
-        assertEquals(0, mTested.getPosition());
+        assertEquals(mTested.getCount(), mTested.getPosition());
     }
 
     @Test
@@ -176,7 +180,7 @@ public class EntityCursorTest {
         final boolean success = mTested.moveToNext();
 
         assertTrue(success);
-        assertEquals(1, mTested.getPosition());
+        assertEquals(0, mTested.getPosition());
     }
 
     @Test
@@ -215,6 +219,7 @@ public class EntityCursorTest {
     @Test
     public void shouldBeFirst() {
         providedHasCount(1);
+        mTested.moveToFirst();
 
         assertTrue(mTested.isFirst());
     }
@@ -246,7 +251,6 @@ public class EntityCursorTest {
     @Test
     public void shouldBeBeforeFirst() {
         providedHasCount(3);
-        mTested.moveToPosition(-1);
 
         assertTrue(mTested.isBeforeFirst());
     }
@@ -254,6 +258,7 @@ public class EntityCursorTest {
     @Test
     public void shouldNotBeBeforeFirst() {
         providedHasCount(2);
+        mTested.moveToFirst();
 
         assertFalse(mTested.isBeforeFirst());
     }
