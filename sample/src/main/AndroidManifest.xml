@@ -1,5 +1,5 @@
 <manifest
-    package="bg.dalexiev.bender"
+    package="bg.dalexiev.bender.sample"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application

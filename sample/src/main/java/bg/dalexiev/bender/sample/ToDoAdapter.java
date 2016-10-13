@@ -1,7 +1,6 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import android.content.Context;
-import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;

@@ -1,4 +1,4 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteOpenHelper;

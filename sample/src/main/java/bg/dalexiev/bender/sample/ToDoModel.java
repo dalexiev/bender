@@ -1,4 +1,4 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import java.util.Calendar;
 

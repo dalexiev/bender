@@ -1,4 +1,4 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -25,7 +25,7 @@ public class AddToDoDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final EditText toDoEditText = new EditText(getActivity());
-        
+
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.addDialogTitle)
                 .setView(toDoEditText)

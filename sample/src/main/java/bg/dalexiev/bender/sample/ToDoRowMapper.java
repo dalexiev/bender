@@ -1,4 +1,4 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import android.database.Cursor;
 import android.support.annotation.NonNull;

@@ -1,4 +1,4 @@
-package bg.dalexiev.bender;
+package bg.dalexiev.bender.sample;
 
 import android.content.Context;
 import android.net.Uri;
@@ -27,7 +27,6 @@ import bg.dalexiev.bender.content.ResolverCommandBuilder;
 import bg.dalexiev.bender.content.SupportEntityCursorLoader;
 import bg.dalexiev.bender.content.UpdateCommand;
 import bg.dalexiev.bender.db.Predicate;
-
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AddToDoDialog.Listener,
         InsertCommand.Callback, AbsListView.MultiChoiceModeListener, DeleteCommand.Callback, UpdateCommand.Callback {
