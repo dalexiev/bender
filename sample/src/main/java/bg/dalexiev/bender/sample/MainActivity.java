@@ -19,11 +19,11 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 
+import bg.dalexiev.bender.content.BenderContentResolver;
 import bg.dalexiev.bender.content.DeleteCommand;
 import bg.dalexiev.bender.content.EntityCursor;
 import bg.dalexiev.bender.content.InsertCommand;
 import bg.dalexiev.bender.content.QueryCommand;
-import bg.dalexiev.bender.content.ResolverCommandBuilder;
 import bg.dalexiev.bender.content.SupportEntityCursorLoader;
 import bg.dalexiev.bender.content.UpdateCommand;
 import bg.dalexiev.bender.db.Predicate;
@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ToDoAdapter mAdapter;
 
-    private ResolverCommandBuilder mBuilder;
+    private BenderContentResolver mBender;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mBuilder = new ResolverCommandBuilder();
+        mBender = new BenderContentResolver(getContentResolver());
 
         mAdapter = new ToDoAdapter(this);
 
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onToDoTitleEntered(String toDo) {
-        mBuilder.insert(getContentResolver())
+        mBender.insert()
                 .onUri(Schema.ToDo.URL)
                 .set(Schema.ToDo.TITLE, toDo)
                 .set(Schema.ToDo.CREATION_DATE, Calendar.getInstance().getTimeInMillis())
@@ -129,14 +129,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void deleteToDos(String[] ids) {
-        mBuilder.delete(getContentResolver())
+        mBender.delete()
                 .onUri(Schema.ToDo.URL)
                 .where(Predicate.in(Schema.ToDo._ID, ids))
                 .executeAsync(DELETE_TODOS, this);
     }
 
     private void checkToDos(String[] ids) {
-        mBuilder.update(getContentResolver())
+        mBender.update()
                 .onUri(Schema.ToDo.URL)
                 .set(Schema.ToDo.IS_DONE, true)
                 .where(Predicate.in(Schema.ToDo._ID, ids))
@@ -184,7 +184,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public Loader<EntityCursor<ToDoModel>> onCreateLoader(int id, Bundle args) {
-            final QueryCommand query = mBuilder.query(mContext.getContentResolver(), ToDoModel.class)
+            final QueryCommand query = mBender.query(ToDoModel.class)
                     .onUri(Schema.ToDo.URL)
                     .select(Schema.ToDo._ID, Schema.ToDo.TITLE, Schema.ToDo.CREATION_DATE, Schema.ToDo.IS_DONE)
                     .useRowMapper(new ToDoRowMapper());
