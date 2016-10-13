@@ -32,7 +32,7 @@ import bg.dalexiev.bender.util.Preconditions;
  * <dt>{@code authority}</dt>
  * <dd>A string used as a unique identifier of the provider. Usually in the format {@code <your package
  * name>.provider}</dd>
- *
+ * <p>
  * <dt>{@code helper}</dt>
  * <dd>A {@link SQLiteOpenHelper} instance that is used to obtain database instances. This helper typically contains
  * all the database creation and migration logic.</dd>
@@ -50,11 +50,11 @@ public abstract class DatabaseContentProvider extends ContentProvider {
     /**
      * Used to specify the conflict resolution algorithm to be used while performing the database operation.
      * Only taken into consideration when inserting or updating.
-     *
+     * <p>
      * <p>Supported values: {@link SQLiteDatabase#CONFLICT_NONE}, {@link SQLiteDatabase#CONFLICT_ROLLBACK}, {@link
      * SQLiteDatabase#CONFLICT_ABORT}, {@link SQLiteDatabase#CONFLICT_REPLACE}, {@link SQLiteDatabase#CONFLICT_IGNORE},
      * {@link SQLiteDatabase#CONFLICT_FAIL}.
-     *
+     * <p>
      * <p>Defaults to {@link SQLiteDatabase#CONFLICT_NONE}. All unknown values are replaced by the default value.
      *
      * @since 1.1.1
@@ -105,7 +105,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * @param authority required. The authority of the current content provider.
      * @return the URI matcher. Must not be {@code null}.
      */
-    @SuppressWarnings("MethodMayBeStatic") // This is not static, because subclasses may need to override it
+    @SuppressWarnings("MethodMayBeStatic")
+    // This is not static, because subclasses may need to override it
     @NonNull
     protected DatabaseUriMatcher createUriMatcher(@NonNull String authority) {
         return new DatabaseUriMatcher(authority);
@@ -118,12 +119,12 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * to create a {@code SqlSelectionBuilder} using the passed parameter values and later use the selection to perform
      * the query against the database.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
     public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs,
-            String sortOrder) {
+                        String sortOrder) {
         Preconditions.argumentNotNull(uri, "Uri can't be null");
 
         final DatabaseUriMatcher.Result match = matchUri(uri);
@@ -151,7 +152,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
 
     /**
      * Create a {@code SqlSelectionBuilder} that will be used to execute a query against the database.
-     *
+     * <p>
      * <p>
      * Override this to customise the query building behaviour. The current implementation will add all parameter
      * values
@@ -171,10 +172,11 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * @return a {@code non - null} selection builder, used to execute the query.
      * @since 1.0
      */
-    @SuppressWarnings("MethodMayBeStatic") // This is not static, because subclasses may need to override it
+    @SuppressWarnings("MethodMayBeStatic")
+    // This is not static, because subclasses may need to override it
     @NonNull
     protected SqlSelectionBuilder buildQuerySelection(@NonNull Uri uri, @NonNull DatabaseUriMatcher.Result match,
-            @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
+                                                      @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
         final SqlSelectionBuilder builder = new SqlSelectionBuilder();
         switch (match.code) {
             case DatabaseUriMatcher.TYPE_ROW:
@@ -212,7 +214,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * This implementation calls {@link #buildInsertion(Uri, DatabaseUriMatcher.Result, ContentValues...)}
      * to create a {@code SqlInsertionBuilder} that will be used to perform the actual insert against the database.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -225,7 +227,9 @@ public abstract class DatabaseContentProvider extends ContentProvider {
         final SqlInsertionBuilder builder = buildInsertion(uri, match, values);
         final int conflictAlgorithm = getConflictAlgorithm(uri);
         final List<Long> generatedIds = builder.insert(db, conflictAlgorithm);
-        notifyChange(uri);
+        if ((generatedIds != null) && !generatedIds.isEmpty()) {
+            notifyChange(uri);
+        }
         return ContentUris.withAppendedId(uri, generatedIds.get(0));
     }
 
@@ -235,7 +239,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * to create a {@code SqlInsertionBuilder} that will be used to perform the actual insert against the database.
      * It will wrap all insertions in a single transaction for optimal performance.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -250,7 +254,9 @@ public abstract class DatabaseContentProvider extends ContentProvider {
             final SqlInsertionBuilder builder = buildInsertion(uri, match, values);
             final int conflictAlgorithm = getConflictAlgorithm(uri);
             final List<Long> generatedIds = builder.insert(db, conflictAlgorithm);
-            notifyChange(uri);
+            if ((generatedIds != null) && !generatedIds.isEmpty()) {
+                notifyChange(uri);
+            }
             db.setTransactionSuccessful();
             return generatedIds.size();
         } finally {
@@ -270,7 +276,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
 
     /**
      * Create a {@code SqlInsertionBuilder} that is used to perform the insert.
-     *
+     * <p>
      * <p>
      * Override this to customise the insertion building logic.
      * </p>
@@ -282,10 +288,11 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * @return a {@code non - null} insertion builder that is going to be used to perform the actual insert
      * @since 1.0
      */
-    @SuppressWarnings("MethodMayBeStatic") // This is not static, because subclasses may need to override it
+    @SuppressWarnings("MethodMayBeStatic")
+    // This is not static, because subclasses may need to override it
     @NonNull
     protected SqlInsertionBuilder buildInsertion(@NonNull Uri uri, @NonNull DatabaseUriMatcher.Result match,
-            @Nullable ContentValues... values) {
+                                                 @Nullable ContentValues... values) {
         final SqlInsertionBuilder builder = new SqlInsertionBuilder().setTable(match.table);
         if (values != null) {
             builder.appendValues(values);
@@ -298,7 +305,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * This implementation calls {@link #buildUpdateDeleteSelection(Uri, DatabaseUriMatcher.Result, String, String[])}
      * to create a {@code SqlSelectionBuilder} that will be used to perform the actual delete against the database.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -310,7 +317,9 @@ public abstract class DatabaseContentProvider extends ContentProvider {
         final SQLiteDatabase db = mHelper.getWritableDatabase();
         final SqlSelectionBuilder builder = buildUpdateDeleteSelection(uri, match, selection, selectionArgs);
         final int deletedRows = builder.delete(db);
-        notifyChange(uri);
+        if (0 < deletedRows) {
+            notifyChange(uri);
+        }
         return deletedRows;
     }
 
@@ -319,7 +328,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * This implementation calls {@link #buildUpdateDeleteSelection(Uri, DatabaseUriMatcher.Result, String, String[])}
      * to create a {@code SqlSelectionBuilder} that will be used to perform the actual update against the database.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -334,13 +343,15 @@ public abstract class DatabaseContentProvider extends ContentProvider {
         final SqlSelectionBuilder builder = buildUpdateDeleteSelection(uri, match, selection, selectionArgs);
         final int conflictAlgorithm = getConflictAlgorithm(uri);
         final int updatedRows = builder.update(db, values, conflictAlgorithm);
-        notifyChange(uri);
+        if (0 < updatedRows) {
+            notifyChange(uri);
+        }
         return updatedRows;
     }
 
     /**
      * Create a {@code SqlSelectionBuilder} that will be used to execute a delete or an update against the database.
-     *
+     * <p>
      * <p>
      * Override this to customise the selection logic. The current implementation will apply the selection and
      * selection
@@ -356,11 +367,12 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * @return a {@code non - null} selection builder, used to execute the operation.
      * @since 1.0
      */
-    @SuppressWarnings("MethodMayBeStatic") // This is not static, because subclasses may need to override it
+    @SuppressWarnings("MethodMayBeStatic")
+    // This is not static, because subclasses may need to override it
     @NonNull
     public SqlSelectionBuilder buildUpdateDeleteSelection(@NonNull Uri uri, @NonNull DatabaseUriMatcher.Result match,
-            @Nullable String selection,
-            @Nullable String[] selectionArgs) {
+                                                          @Nullable String selection,
+                                                          @Nullable String[] selectionArgs) {
         final SqlSelectionBuilder builder = new SqlSelectionBuilder();
         switch (match.code) {
             case DatabaseUriMatcher.TYPE_ROW:
@@ -376,7 +388,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * <p>
      * The current implementation wraps the execution of all batch operations in a transaction.
      * </p>
-     *
+     * <p>
      * {@inheritDoc}
      */
     @Override
