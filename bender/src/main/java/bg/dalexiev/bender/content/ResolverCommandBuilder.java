@@ -4,7 +4,11 @@ import android.content.ContentResolver;
 import android.support.annotation.NonNull;
 
 /**
+ * Deprecated since 1.1.2
+ * <p>
+ * Use {@link BenderContentResolver} instead.
  */
+@Deprecated
 public final class ResolverCommandBuilder {
 
     @NonNull
