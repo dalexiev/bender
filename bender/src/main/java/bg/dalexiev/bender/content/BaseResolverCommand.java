@@ -18,10 +18,9 @@ import bg.dalexiev.bender.util.Preconditions;
 /**
  * A skeleton implementation of a resolver command that can be executed both synchronously and asynchronously.
  *
- * @param <T> the type of the result, returned by the command
- * @param <C> the type of the callback that can be registered on the command
+ * @param <T>  the type of the result, returned by the command
+ * @param <C>  the type of the callback that can be registered on the command
  * @param <RC> the concrete type of the command
- *
  * @author danail.alexiev
  * @since 1.0
  */
@@ -37,6 +36,7 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
 
     private Uri mUri;
     private int mToken;
+    private boolean mCancelObserverNotification;
 
     protected BaseResolverCommand(@NonNull ContentResolver contentResolver) {
         Preconditions.argumentNotNull(contentResolver, "ContentResolver can't be null");
@@ -63,7 +63,7 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
 
     /**
      * Specify the content URI to execute the command against.
-     *
+     * <p>
      * <p>
      * Must be called before trying to use {@link #execute()} or {@link #executeAsync(int, Callback)}
      * </p>
@@ -79,6 +79,19 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
         mUri = uri;
 
         //noinspection unchecked
+        return (RC) this;
+    }
+
+    /**
+     * Cancel notifications to {@link android.database.ContentObserver}s
+     * registered on the uri of the current operation.
+     *
+     * @return the current instance.
+     * @since 1.1.3
+     */
+    public RC cancelObserverNotification() {
+        mCancelObserverNotification = true;
+
         return (RC) this;
     }
 
@@ -104,7 +117,7 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
     /**
      * Execute the {@code ContentResolver} command on a worker thread.
      *
-     * @param token a uniquer identifier for the command.
+     * @param token    a uniquer identifier for the command.
      * @param callback optional. A callback that will be notified on the current thread when the operation completes.
      * @throws IllegalStateException if no URI has been set by calling {@link #onUri(Uri)}
      * @since 1.0
@@ -139,6 +152,13 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
      */
     @Nullable
     protected Uri getUri() {
+        if (mCancelObserverNotification) {
+            return mUri
+                    .buildUpon()
+                    .appendQueryParameter(DatabaseContentProvider.PARAM_SHOULD_NOTIFY, "false")
+                    .build();
+        }
+
         return mUri;
     }
 
@@ -182,8 +202,8 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
      * Notify the registered callback that the operation has been successfully executed on a background thread.
      *
      * @param callback required. The registered callback.
-     * @param token the unique identified of the operation.
-     * @param result optional. The result of the operation.
+     * @param token    the unique identified of the operation.
+     * @param result   optional. The result of the operation.
      * @since 1.0
      */
     protected abstract void notifyCallback(@NonNull C callback, int token, @Nullable T result);
@@ -192,7 +212,6 @@ abstract class BaseResolverCommand<T, C extends BaseResolverCommand.Callback, RC
      * A handler used to communicate with the worker thread that executes commands.
      *
      * @param <T> the type of the command result
-     *
      * @author danail.alexiev
      * @since 1.0
      */

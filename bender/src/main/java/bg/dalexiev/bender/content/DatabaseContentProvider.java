@@ -61,6 +61,16 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      */
     public static final String PARAM_CONFLICT_ALGORITHM = "onConflict";
 
+    /**
+     * Used to specify if the provider should notify the {@link android.database.ContentObserver}s
+     * registered for the URL when the operation has been completed.
+     * <p>
+     * Defaults to {@code true}.
+     *
+     * @since 1.1.4
+     */
+    public static final String PARAM_SHOULD_NOTIFY = "shouldNotify";
+
     private String mAuthority;
     private SQLiteOpenHelper mHelper;
     private DatabaseUriMatcher mUriMatcher;
@@ -114,12 +124,10 @@ public abstract class DatabaseContentProvider extends ContentProvider {
 
     /**
      * <p>
-     * This implementation will call {@link #buildQuerySelection(Uri, DatabaseUriMatcher.Result, String, String[],
-     * String)}
+     * This implementation will call {@link #buildQuerySelection(Uri, DatabaseUriMatcher.Result, String, String[], String)}
      * to create a {@code SqlSelectionBuilder} using the passed parameter values and later use the selection to perform
      * the query against the database.
      * </p>
-     * <p>
      * {@inheritDoc}
      */
     @Override
@@ -155,9 +163,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      * <p>
      * <p>
      * Override this to customise the query building behaviour. The current implementation will add all parameter
-     * values
-     * to their appropriate clauses and, if a specific table row is requests, will add {@link BaseColumns#_ID}{@code =
-     * ?} condition to the {@code where} clause.
+     * values to their appropriate clauses and, if a specific table row is requests,
+     * will add {@link BaseColumns#_ID}{@code =?} condition to the {@code where} clause.
      * </p>
      *
      * @param uri           required. The requested content URI.
@@ -420,7 +427,8 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      */
     protected void notifyChange(@NonNull Uri uri) {
         final Context context = getContext();
-        if (context != null) {
+        final boolean shouldNotify = uri.getBooleanQueryParameter(PARAM_CONFLICT_ALGORITHM, true);
+        if (context != null && shouldNotify) {
             context.getContentResolver().notifyChange(uri, null);
         }
     }
