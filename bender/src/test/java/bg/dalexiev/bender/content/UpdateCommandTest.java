@@ -3,12 +3,12 @@ package bg.dalexiev.bender.content;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Message;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
@@ -34,6 +34,9 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
 
     @Spy
     private SqlSelectionBuilder mSelectionBuilder;
+
+    @Spy
+    private OnConflictBuilder mOnConflictBuilder;
 
     @Test
     public void shouldSetUpdateValues() {
@@ -210,6 +213,23 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
                 .update(eq(mUri), any(ContentValues.class), eq('(' + selection + ')'), eq(selectionArgs));
     }
 
+    @Test
+    public void shouldSetOnConflict() {
+        final int expectedOnConflict = SQLiteDatabase.CONFLICT_ABORT;
+
+        mTested
+                .onUri(mUri)
+                .onConflict(expectedOnConflict)
+                .set("foo", "bar")
+                .execute();
+
+        final InOrder executionOrder = inOrder(mOnConflictBuilder, mUri, mUri.buildUpon());
+        executionOrder.verify(mOnConflictBuilder).setOnConflict(eq(expectedOnConflict));
+        executionOrder.verify(mOnConflictBuilder).appendOnConflictParameter(eq(mUri));
+        executionOrder.verify(mUri).buildUpon();
+        executionOrder.verify(mUri.buildUpon()).appendQueryParameter(eq(DatabaseContentProvider.PARAM_CONFLICT_ALGORITHM), eq(String.valueOf(expectedOnConflict)));
+    }
+
     @Override
     protected void verifyContentResolverMethodCalled(@NonNull InOrder executionOrder,
             @Nullable Map<String, Object> executionParams) {
@@ -259,7 +279,7 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
     @Override
     protected UpdateCommand createTested(@NonNull BaseResolverCommand.WorkerHandler workerHandler,
             @NonNull ContentResolver contentResolver) {
-        return new UpdateCommand(workerHandler, contentResolver, mContentValuesBuilder, mSelectionBuilder);
+        return new UpdateCommand(workerHandler, contentResolver, mContentValuesBuilder, mSelectionBuilder, mOnConflictBuilder);
     }
 
 

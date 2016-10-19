@@ -2,6 +2,7 @@ package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,19 +23,38 @@ public class UpdateCommand
 
     private final ContentValuesBuilder mContentValuesBuilder;
     private final SqlSelectionBuilder mSelectionBuilder;
+    private final OnConflictBuilder mOnConflictBuilder;
 
     UpdateCommand(ContentResolver contentResolver) {
         super(contentResolver);
         mContentValuesBuilder = new ContentValuesBuilder();
         mSelectionBuilder = new SqlSelectionBuilder();
+        mOnConflictBuilder = new OnConflictBuilder();
     }
 
     @VisibleForTesting
     UpdateCommand(WorkerHandler workerHandler, ContentResolver contentResolver,
-                  ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder) {
+                  ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder, OnConflictBuilder onConflictBuilder) {
         super(workerHandler, contentResolver);
         mContentValuesBuilder = contentValuesBuilder;
         mSelectionBuilder = selectionBuilder;
+        mOnConflictBuilder = onConflictBuilder;
+    }
+
+    /**
+     * Sets the conflict resolution algorithm.
+     *
+     * @param onConflict the algorithm to use when a unique constaint is violated. Supported values are:
+     *                   {@link SQLiteDatabase#CONFLICT_NONE}, {@link SQLiteDatabase#CONFLICT_ROLLBACK}, {@link
+     *                   SQLiteDatabase#CONFLICT_ABORT}, {@link SQLiteDatabase#CONFLICT_REPLACE}, {@link SQLiteDatabase#CONFLICT_IGNORE},
+     *                   {@link SQLiteDatabase#CONFLICT_FAIL}.
+     * @return the current instance.
+     * @since 1.1.5
+     */
+    public UpdateCommand onConflict(int onConflict) {
+        mOnConflictBuilder.setOnConflict(onConflict);
+
+        return this;
     }
 
     /**
@@ -272,7 +292,7 @@ public class UpdateCommand
 
     @Override
     protected Integer executeResolverCommand(@NonNull ContentResolver contentResolver) {
-        Uri uri = getUri();
+        @SuppressWarnings("ConstantConditions") final Uri uri = mOnConflictBuilder.appendOnConflictParameter(getUri());
 
         return contentResolver
                 .update(uri, getContentValues(), getSelection(), getSelectionArgs());

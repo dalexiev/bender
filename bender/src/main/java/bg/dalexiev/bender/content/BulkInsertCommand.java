@@ -2,6 +2,8 @@ package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -15,16 +17,35 @@ import android.support.annotation.VisibleForTesting;
 public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCommand.Callback, BulkInsertCommand> {
 
     private final ContentValuesBuilder mContentValuesBuilder;
+    private final OnConflictBuilder mOnConflictBuilder;
 
     BulkInsertCommand(ContentResolver contentResolver) {
         super(contentResolver);
         mContentValuesBuilder = new ContentValuesBuilder();
+        mOnConflictBuilder = new OnConflictBuilder();
     }
 
     @VisibleForTesting
-    BulkInsertCommand(WorkerHandler workerHandler, ContentResolver contentResolver, ContentValuesBuilder contentValuesBuilder) {
+    BulkInsertCommand(WorkerHandler workerHandler, ContentResolver contentResolver, ContentValuesBuilder contentValuesBuilder, OnConflictBuilder onConflictBuilder) {
         super(workerHandler, contentResolver);
         mContentValuesBuilder = contentValuesBuilder;
+        mOnConflictBuilder = onConflictBuilder;
+    }
+
+    /**
+     * Sets the conflict resolution algorithm.
+     *
+     * @param onConflict the algorithm to use when a unique constaint is violated. Supported values are:
+     *                   {@link SQLiteDatabase#CONFLICT_NONE}, {@link SQLiteDatabase#CONFLICT_ROLLBACK}, {@link
+     *                   SQLiteDatabase#CONFLICT_ABORT}, {@link SQLiteDatabase#CONFLICT_REPLACE}, {@link SQLiteDatabase#CONFLICT_IGNORE},
+     *                   {@link SQLiteDatabase#CONFLICT_FAIL}.
+     * @return the current instance.
+     * @since 1.1.5
+     */
+    public BulkInsertCommand onConflict(int onConflict) {
+        mOnConflictBuilder.setOnConflict(onConflict);
+
+        return this;
     }
 
     /**
@@ -201,7 +222,8 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
 
     @Override
     protected Integer executeResolverCommand(@NonNull ContentResolver contentResolver) {
-        return contentResolver.bulkInsert(getUri(), getContentValues());
+        @SuppressWarnings("ConstantConditions") final Uri uri = mOnConflictBuilder.appendOnConflictParameter(getUri());
+        return contentResolver.bulkInsert(uri, getContentValues());
     }
 
     ContentValues[] getContentValues() {

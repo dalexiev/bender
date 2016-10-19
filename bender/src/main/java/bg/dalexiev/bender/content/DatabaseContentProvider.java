@@ -32,7 +32,6 @@ import bg.dalexiev.bender.util.Preconditions;
  * <dt>{@code authority}</dt>
  * <dd>A string used as a unique identifier of the provider. Usually in the format {@code <your package
  * name>.provider}</dd>
- * <p>
  * <dt>{@code helper}</dt>
  * <dd>A {@link SQLiteOpenHelper} instance that is used to obtain database instances. This helper typically contains
  * all the database creation and migration logic.</dd>

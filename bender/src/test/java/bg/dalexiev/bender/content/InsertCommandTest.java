@@ -1,24 +1,23 @@
 package bg.dalexiev.bender.content;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
+import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.net.Uri;
-import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.util.Map;
 
-import static junit.framework.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -30,6 +29,9 @@ public class InsertCommandTest extends ResolverCommandTestBase<InsertCommand.Cal
 
     @Spy
     private ContentValuesBuilder mContentValuesBuilder;
+
+    @Spy
+    private OnConflictBuilder mOnConflictBuilder;
 
     @Test
     public void shouldSetUpdateValues() {
@@ -145,10 +147,27 @@ public class InsertCommandTest extends ResolverCommandTestBase<InsertCommand.Cal
         mTested.set("test", (byte[]) null);
     }
 
+    @Test
+    public void shouldSetOnConflict() {
+        final int expectedOnConflict = SQLiteDatabase.CONFLICT_ABORT;
+
+        mTested
+                .onUri(mUri)
+                .onConflict(expectedOnConflict)
+                .set("foo", "bar")
+                .execute();
+
+        final InOrder executionOrder = inOrder(mOnConflictBuilder, mUri, mUri.buildUpon());
+        executionOrder.verify(mOnConflictBuilder).setOnConflict(eq(expectedOnConflict));
+        executionOrder.verify(mOnConflictBuilder).appendOnConflictParameter(eq(mUri));
+        executionOrder.verify(mUri).buildUpon();
+        executionOrder.verify(mUri.buildUpon()).appendQueryParameter(eq(DatabaseContentProvider.PARAM_CONFLICT_ALGORITHM), eq(String.valueOf(expectedOnConflict)));
+    }
+
     @NonNull
     @Override
     protected InsertCommand createTested(@NonNull BaseResolverCommand.WorkerHandler workerHandler, @NonNull ContentResolver contentResolver) {
-        return new InsertCommand(workerHandler, contentResolver, mContentValuesBuilder);
+        return new InsertCommand(workerHandler, contentResolver, mContentValuesBuilder, mOnConflictBuilder);
     }
 
     @Override
@@ -173,7 +192,7 @@ public class InsertCommandTest extends ResolverCommandTestBase<InsertCommand.Cal
 
     @Override
     protected void verifyContentResolverMethodCalled(@NonNull InOrder executionOrder,
-            Map<String, Object> executionParams) {
+                                                     Map<String, Object> executionParams) {
         executionOrder.verify(mContentResolver).insert(eq(mUri), any(ContentValues.class));
     }
 

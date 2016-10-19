@@ -1,5 +1,11 @@
 package bg.dalexiev.bender.content;
 
+import android.content.ContentResolver;
+import android.net.Uri;
+import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -7,21 +13,17 @@ import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import android.content.ContentResolver;
-import android.net.Uri;
-import android.os.Message;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-
 import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -42,6 +44,12 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
 
     @Before
     public void setUp() {
+        final Uri.Builder uriBuilder = mock(Uri.Builder.class);
+        doReturn(uriBuilder).when(uriBuilder).appendQueryParameter(anyString(), anyString());
+        doReturn(mUri).when(uriBuilder).build();
+
+        doReturn(uriBuilder).when(mUri).buildUpon();
+
         mTested = createTested(mWorkerHandler, mContentResolver);
         mCallback = createCallback();
     }
@@ -63,7 +71,7 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
     }
 
     @Nullable
-    protected abstract Map<String,Object> executeCommand();
+    protected abstract Map<String, Object> executeCommand();
 
     @Test
     public void shouldExecuteAsync() throws Exception {
@@ -81,7 +89,7 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
     protected abstract Map<String, Object> executeAsyncCommand(int token, C callback);
 
     protected abstract void verifyContentResolverMethodCalled(@NonNull InOrder executionOrder,
-            @Nullable Map<String, Object> executionParams) throws Exception;
+                                                              @Nullable Map<String, Object> executionParams) throws Exception;
 
     @Test
     public void shouldNotifyCallback() {
@@ -110,9 +118,24 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
         verify(mWorkerHandler).removeMessages(eq(token));
     }
 
+    @Test
+    public void shouldNotNotifyObservers() {
+        mTested.cancelObserverNotification();
+        executeCommand();
+
+        verify(mUri.buildUpon()).appendQueryParameter(eq(DatabaseContentProvider.PARAM_SHOULD_NOTIFY), eq("false"));
+    }
+
+    @Test
+    public void shouldNotifyObservers() {
+        executeCommand();
+
+        verify(mUri.buildUpon(), never()).appendQueryParameter(eq(DatabaseContentProvider.PARAM_SHOULD_NOTIFY), eq("false"));
+    }
+
     @NonNull
     protected abstract T createTested(@NonNull BaseResolverCommand.WorkerHandler workerHandler,
-            @NonNull ContentResolver contentResolver);
+                                      @NonNull ContentResolver contentResolver);
 
     protected void providedAsyncMessageSent() {
         final Message message = mock(Message.class);

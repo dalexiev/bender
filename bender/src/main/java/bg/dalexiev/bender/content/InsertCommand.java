@@ -2,6 +2,7 @@ package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,16 +19,19 @@ import bg.dalexiev.bender.util.Preconditions;
 public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callback, InsertCommand> {
 
     private final ContentValuesBuilder mContentValuesBuilder;
+    private final OnConflictBuilder mOnConflictBuilder;
 
     InsertCommand(ContentResolver contentResolver) {
         super(contentResolver);
         mContentValuesBuilder = new ContentValuesBuilder();
+        mOnConflictBuilder = new OnConflictBuilder();
     }
 
     @VisibleForTesting
-    InsertCommand(WorkerHandler workerHandler, ContentResolver callbackHandler, ContentValuesBuilder contentValuesBuilder) {
+    InsertCommand(WorkerHandler workerHandler, ContentResolver callbackHandler, ContentValuesBuilder contentValuesBuilder, OnConflictBuilder conflictBuilder) {
         super(workerHandler, callbackHandler);
         mContentValuesBuilder = contentValuesBuilder;
+        mOnConflictBuilder = conflictBuilder;
     }
 
     @Override
@@ -37,6 +41,22 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
         Preconditions
                 .stateNotNull(mContentValuesBuilder,
                         "Entities and row mapper not set. Did you call forEntity() or forEntities()?");
+    }
+
+    /**
+     * Sets the conflict resolution algorithm.
+     *
+     * @param onConflict the algorithm to use when a unique constaint is violated. Supported values are:
+     *                   {@link SQLiteDatabase#CONFLICT_NONE}, {@link SQLiteDatabase#CONFLICT_ROLLBACK}, {@link
+     *                   SQLiteDatabase#CONFLICT_ABORT}, {@link SQLiteDatabase#CONFLICT_REPLACE}, {@link SQLiteDatabase#CONFLICT_IGNORE},
+     *                   {@link SQLiteDatabase#CONFLICT_FAIL}.
+     * @return the current instance.
+     * @since 1.1.5
+     */
+    public InsertCommand onConflict(int onConflict) {
+        mOnConflictBuilder.setOnConflict(onConflict);
+
+        return this;
     }
 
     /**
@@ -58,7 +78,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -74,7 +94,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -90,7 +110,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -106,7 +126,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -122,7 +142,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -138,7 +158,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -154,7 +174,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -170,7 +190,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -186,7 +206,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -201,7 +221,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
     @Override
     @Nullable
     protected Uri executeResolverCommand(@NonNull ContentResolver contentResolver) {
-        final Uri insertUri = getUri();
+        @SuppressWarnings("ConstantConditions") final Uri insertUri = mOnConflictBuilder.appendOnConflictParameter(getUri());
         return contentResolver.insert(insertUri, getContentValues());
     }
 
@@ -226,7 +246,7 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
          * Called when a bulk insert has been completed.
          *
          * @param token the identifier of the completed command.
-         * @param uri the URI of the inserted item
+         * @param uri   the URI of the inserted item
          * @since 1.0
          */
         void onInsertComplete(int token, Uri uri);

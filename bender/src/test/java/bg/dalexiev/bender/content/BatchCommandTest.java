@@ -70,6 +70,13 @@ public class BatchCommandTest extends ResolverCommandTestBase<BatchCommand.Callb
         // ignored
     }
 
+    @Override
+    @Test
+    @Ignore
+    public void shouldNotNotifyObservers() {
+        // ignored - no Uri here.
+    }
+
     @Nullable
     @Override
     protected Map<String, Object> executeCommand() {
