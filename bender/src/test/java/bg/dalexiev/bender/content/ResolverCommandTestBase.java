@@ -54,7 +54,7 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
     }
 
     @Test
-    public void shouldExecute() {
+    public void shouldExecute() throws Exception {
         final Map<String, Object> params = executeCommand();
 
         verifyZeroInteractions(mWorkerHandler);
@@ -66,7 +66,7 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
     protected abstract Map<String,Object> executeCommand();
 
     @Test
-    public void shouldExecuteAsync() {
+    public void shouldExecuteAsync() throws Exception {
         providedAsyncMessageSent();
 
         final Map<String, Object> params = executeAsyncCommand(1, mCallback);
@@ -81,7 +81,7 @@ public abstract class ResolverCommandTestBase<C extends BaseResolverCommand.Call
     protected abstract Map<String, Object> executeAsyncCommand(int token, C callback);
 
     protected abstract void verifyContentResolverMethodCalled(@NonNull InOrder executionOrder,
-            @Nullable Map<String, Object> executionParams);
+            @Nullable Map<String, Object> executionParams) throws Exception;
 
     @Test
     public void shouldNotifyCallback() {

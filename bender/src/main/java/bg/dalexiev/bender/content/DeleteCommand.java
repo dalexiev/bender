@@ -97,7 +97,15 @@ public class DeleteCommand extends BaseResolverCommand<Integer, DeleteCommand.Ca
     @Override
     protected Integer executeResolverCommand(@NonNull ContentResolver contentResolver) {
         final Uri uri = getUri();
-        return contentResolver.delete(uri, mSelectionBuilder.getSelection(), mSelectionBuilder.getSelectionArgs());
+        return contentResolver.delete(uri, getSelection(), getSelectionArgs());
+    }
+
+    String[] getSelectionArgs() {
+        return mSelectionBuilder.getSelectionArgs();
+    }
+
+    String getSelection() {
+        return mSelectionBuilder.getSelection();
     }
 
     @Override

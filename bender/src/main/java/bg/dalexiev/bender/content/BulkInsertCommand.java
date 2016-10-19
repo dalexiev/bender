@@ -1,6 +1,7 @@
 package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.VisibleForTesting;
@@ -45,7 +46,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -61,7 +62,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -77,7 +78,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -93,7 +94,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -109,7 +110,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -125,7 +126,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -141,7 +142,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -158,7 +159,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
      * Set {@code value} as the value for {@code column} in the current row
      *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -172,8 +173,9 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
 
     /**
      * Set {@code value} as the value for {@code column} in the current row
+     *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -199,7 +201,11 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
 
     @Override
     protected Integer executeResolverCommand(@NonNull ContentResolver contentResolver) {
-        return contentResolver.bulkInsert(getUri(), mContentValuesBuilder.getValuesAsArray());
+        return contentResolver.bulkInsert(getUri(), getContentValues());
+    }
+
+    ContentValues[] getContentValues() {
+        return mContentValuesBuilder.getValuesAsArray();
     }
 
     @Override
@@ -219,7 +225,7 @@ public class BulkInsertCommand extends BaseResolverCommand<Integer, BulkInsertCo
         /**
          * Called when a bulk insert has been completed.
          *
-         * @param token the identifier of the completed command.
+         * @param token        the identifier of the completed command.
          * @param insertedRows the number of inserted rows.
          * @since 1.0
          */

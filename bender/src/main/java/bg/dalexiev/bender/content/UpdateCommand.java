@@ -1,6 +1,7 @@
 package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,7 +31,7 @@ public class UpdateCommand
 
     @VisibleForTesting
     UpdateCommand(WorkerHandler workerHandler, ContentResolver contentResolver,
-            ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder) {
+                  ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder) {
         super(workerHandler, contentResolver);
         mContentValuesBuilder = contentValuesBuilder;
         mSelectionBuilder = selectionBuilder;
@@ -55,7 +56,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -71,7 +72,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -87,7 +88,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -103,7 +104,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -119,7 +120,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -135,7 +136,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -151,7 +152,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value The column value.
+     * @param value  The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} is null.
      * @since 1.0
@@ -167,7 +168,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -183,7 +184,7 @@ public class UpdateCommand
      * Set {@code value} as the value for {@code column}
      *
      * @param column required. The column name.
-     * @param value required. The column value.
+     * @param value  required. The column value.
      * @return the current instance.
      * @throws IllegalArgumentException if {@code column} or {@code value} is null.
      * @since 1.0
@@ -198,7 +199,7 @@ public class UpdateCommand
     /**
      * Appends an expression to the selection of this command. If a selection already exists, the new expression will be added using the {@code AND} logical operator.
      *
-     * @param selection required. The expression to be added to the selection.
+     * @param selection     required. The expression to be added to the selection.
      * @param selectionArgs optional. The values to be bound to the selection.
      * @return the current instance
      * @throws IllegalArgumentException if {@code selection} is {@code null}.
@@ -231,7 +232,7 @@ public class UpdateCommand
     /**
      * Appends an expression to the selection of this command. If a selection already exists, the new expression will be added using the {@code OR} logical operator.
      *
-     * @param selection required. The expression to be added to the selection.
+     * @param selection     required. The expression to be added to the selection.
      * @param selectionArgs optional. The values to be bound to the selection.
      * @return the current instance.
      * * @throws IllegalArgumentException if {@code selection} is {@code null}.
@@ -274,9 +275,20 @@ public class UpdateCommand
         Uri uri = getUri();
 
         return contentResolver
-                .update(uri, mContentValuesBuilder.getSingleValue(), mSelectionBuilder.getSelection(),
-                        mSelectionBuilder.getSelectionArgs());
+                .update(uri, getContentValues(), getSelection(), getSelectionArgs());
 
+    }
+
+    String[] getSelectionArgs() {
+        return mSelectionBuilder.getSelectionArgs();
+    }
+
+    String getSelection() {
+        return mSelectionBuilder.getSelection();
+    }
+
+    ContentValues getContentValues() {
+        return mContentValuesBuilder.getSingleValue();
     }
 
     @Override
@@ -295,7 +307,7 @@ public class UpdateCommand
         /**
          * Called when an update has been completed.
          *
-         * @param token the identifier of the completed command.
+         * @param token       the identifier of the completed command.
          * @param updatedRows the number of updated rows.
          * @since 1.0
          */

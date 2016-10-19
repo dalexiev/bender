@@ -1,6 +1,7 @@
 package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -201,7 +202,11 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
     @Nullable
     protected Uri executeResolverCommand(@NonNull ContentResolver contentResolver) {
         final Uri insertUri = getUri();
-        return contentResolver.insert(insertUri, mContentValuesBuilder.getSingleValue());
+        return contentResolver.insert(insertUri, getContentValues());
+    }
+
+    ContentValues getContentValues() {
+        return mContentValuesBuilder.getSingleValue();
     }
 
     @Override
