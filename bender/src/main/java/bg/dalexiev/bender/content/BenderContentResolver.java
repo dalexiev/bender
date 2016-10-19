@@ -1,7 +1,10 @@
 package bg.dalexiev.bender.content;
 
 import android.content.ContentResolver;
+import android.database.ContentObserver;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import bg.dalexiev.bender.util.Preconditions;
 
@@ -46,4 +49,32 @@ public class BenderContentResolver {
     public <R> QueryCommand<R> query(Class<R> clazz) {
         return new QueryCommand<>(mContentResolver);
     }
+
+    /**
+     * @since 1.1.4
+     */
+    @NonNull
+    public BatchCommand applyBatch() {
+        return new BatchCommand(mContentResolver);
+    }
+
+    /**
+     * @since 1.1.4
+     */
+    public void registerContentObserver(@NonNull Uri uri, boolean notifyForDescendants, @NonNull ContentObserver observer) {
+        Preconditions.argumentNotNull(observer, "Observer can't be null");
+        Preconditions.argumentNotNull(uri, "Uri can't be null");
+
+        mContentResolver.registerContentObserver(uri, notifyForDescendants, observer);
+    }
+
+    /**
+     * @since 1.1.4
+     */
+    public void unregisterContentObserver(@Nullable ContentObserver observer) {
+        if (observer != null) {
+            mContentResolver.unregisterContentObserver(observer);
+        }
+    }
+
 }
