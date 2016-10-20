@@ -77,4 +77,16 @@ public class BenderContentResolver {
         }
     }
 
+
+    /**
+     * Notify observers registered on {@code uri} for a change.
+     *
+     * @param uri required. The changed Uri.
+     * @since 1.1.6
+     */
+    public void notifyChange(@NonNull Uri uri) {
+        Preconditions.argumentNotNull(uri, "Uri can't be null");
+
+        mContentResolver.notifyChange(uri, null);
+    }
 }
