@@ -426,7 +426,7 @@ public abstract class DatabaseContentProvider extends ContentProvider {
      */
     protected void notifyChange(@NonNull Uri uri) {
         final Context context = getContext();
-        final boolean shouldNotify = uri.getBooleanQueryParameter(PARAM_CONFLICT_ALGORITHM, true);
+        final boolean shouldNotify = uri.getBooleanQueryParameter(PARAM_SHOULD_NOTIFY, true);
         if (context != null && shouldNotify) {
             context.getContentResolver().notifyChange(uri, null);
         }
