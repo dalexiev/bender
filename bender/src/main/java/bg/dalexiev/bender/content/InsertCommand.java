@@ -20,18 +20,21 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
 
     private final ContentValuesBuilder mContentValuesBuilder;
     private final OnConflictBuilder mOnConflictBuilder;
+    private final ContentValues mReference;
 
     InsertCommand(ContentResolver contentResolver) {
         super(contentResolver);
         mContentValuesBuilder = new ContentValuesBuilder();
         mOnConflictBuilder = new OnConflictBuilder();
+        mReference = new ContentValues();
     }
 
     @VisibleForTesting
-    InsertCommand(WorkerHandler workerHandler, ContentResolver callbackHandler, ContentValuesBuilder contentValuesBuilder, OnConflictBuilder conflictBuilder) {
+    InsertCommand(WorkerHandler workerHandler, ContentResolver callbackHandler, ContentValuesBuilder contentValuesBuilder, OnConflictBuilder conflictBuilder, ContentValues reference) {
         super(workerHandler, callbackHandler);
         mContentValuesBuilder = contentValuesBuilder;
         mOnConflictBuilder = conflictBuilder;
+        mReference = reference;
     }
 
     @Override
@@ -218,6 +221,27 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
         return this;
     }
 
+    /**
+     * Only applied when adding the command to a batch.
+     * <p>
+     * Replace the value on the specified {@code column} with the result of the bath operation at
+     * index {@code previousResult}
+     * </p>
+     *
+     * @param column required. The column where the previous operation result is stored.
+     * @param previousResult the index of the previous operation in the batch.
+     * @return the current instance
+     * @since 1.1.9
+     */
+    @NonNull
+    public InsertCommand withValueBackReference(@NonNull String column, int previousResult) {
+        Preconditions.argumentNotNull(column, "Column can't be null");
+
+        mReference.put(column, previousResult);
+
+        return this;
+    }
+
     @Override
     @Nullable
     protected Uri executeResolverCommand(@NonNull ContentResolver contentResolver) {
@@ -227,6 +251,10 @@ public class InsertCommand extends BaseResolverCommand<Uri, InsertCommand.Callba
 
     ContentValues getContentValues() {
         return mContentValuesBuilder.getSingleValue();
+    }
+
+    ContentValues getReference() {
+        return mReference;
     }
 
     @Override

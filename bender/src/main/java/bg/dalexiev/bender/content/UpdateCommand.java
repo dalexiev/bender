@@ -24,21 +24,24 @@ public class UpdateCommand
     private final ContentValuesBuilder mContentValuesBuilder;
     private final SqlSelectionBuilder mSelectionBuilder;
     private final OnConflictBuilder mOnConflictBuilder;
+    private final ContentValues mReference;
 
     UpdateCommand(ContentResolver contentResolver) {
         super(contentResolver);
         mContentValuesBuilder = new ContentValuesBuilder();
         mSelectionBuilder = new SqlSelectionBuilder();
         mOnConflictBuilder = new OnConflictBuilder();
+        mReference = new ContentValues();
     }
 
     @VisibleForTesting
     UpdateCommand(WorkerHandler workerHandler, ContentResolver contentResolver,
-                  ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder, OnConflictBuilder onConflictBuilder) {
+                  ContentValuesBuilder contentValuesBuilder, SqlSelectionBuilder selectionBuilder, OnConflictBuilder onConflictBuilder, ContentValues reference) {
         super(workerHandler, contentResolver);
         mContentValuesBuilder = contentValuesBuilder;
         mSelectionBuilder = selectionBuilder;
         mOnConflictBuilder = onConflictBuilder;
+        mReference = reference;
     }
 
     /**
@@ -217,6 +220,27 @@ public class UpdateCommand
     }
 
     /**
+     * Only applied when adding the command to a batch.
+     * <p>
+     * Replace the value on the specified {@code column} with the result of the bath operation at
+     * index {@code previousResult}
+     * </p>
+     *
+     * @param column required. The column where the previous operation result is stored.
+     * @param previousResult the index of the previous operation in the batch.
+     * @return the current instance
+     * @since 1.1.9
+     */
+    @NonNull
+    public UpdateCommand withValueBackReference(@NonNull String column, int previousResult) {
+        Preconditions.argumentNotNull(column, "Column can't be null");
+
+        mReference.put(column, previousResult);
+
+        return this;
+    }
+
+    /**
      * Appends an expression to the selection of this command. If a selection already exists, the new expression will be added using the {@code AND} logical operator.
      *
      * @param selection     required. The expression to be added to the selection.
@@ -309,6 +333,10 @@ public class UpdateCommand
 
     ContentValues getContentValues() {
         return mContentValuesBuilder.getSingleValue();
+    }
+
+    ContentValues getReference() {
+        return mReference;
     }
 
     @Override

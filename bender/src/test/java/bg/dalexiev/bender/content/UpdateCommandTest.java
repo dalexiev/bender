@@ -1,11 +1,5 @@
 package bg.dalexiev.bender.content;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InOrder;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +7,13 @@ import android.os.Message;
 import android.provider.BaseColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.Map;
 
@@ -37,6 +38,9 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
 
     @Spy
     private OnConflictBuilder mOnConflictBuilder;
+
+    @Mock
+    private ContentValues mReference;
 
     @Test
     public void shouldSetUpdateValues() {
@@ -152,6 +156,21 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
         mTested.set("test", (byte[]) null);
     }
 
+    @Test
+    public void shouldSetValueBackReference() {
+        final String column = "test";
+        final int index = 4;
+
+        mTested.withValueBackReference(column, index);
+
+        verify(mReference).put(eq(column), eq(index));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowWhenNoColumnForValueBackReference() {
+        mTested.withValueBackReference(null, 0);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowWhenNullSelection() {
         mTested.where(null, null);
@@ -232,7 +251,7 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
 
     @Override
     protected void verifyContentResolverMethodCalled(@NonNull InOrder executionOrder,
-            @Nullable Map<String, Object> executionParams) {
+                                                     @Nullable Map<String, Object> executionParams) {
         executionOrder.verify(mContentResolver)
                 .update(eq(mUri), any(ContentValues.class), isNull(String.class),
                         isNull(String[].class));
@@ -278,8 +297,8 @@ public class UpdateCommandTest extends ResolverCommandTestBase<UpdateCommand.Cal
     @NonNull
     @Override
     protected UpdateCommand createTested(@NonNull BaseResolverCommand.WorkerHandler workerHandler,
-            @NonNull ContentResolver contentResolver) {
-        return new UpdateCommand(workerHandler, contentResolver, mContentValuesBuilder, mSelectionBuilder, mOnConflictBuilder);
+                                         @NonNull ContentResolver contentResolver) {
+        return new UpdateCommand(workerHandler, contentResolver, mContentValuesBuilder, mSelectionBuilder, mOnConflictBuilder, mReference);
     }
 
 

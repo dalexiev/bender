@@ -11,6 +11,7 @@ import android.support.annotation.Nullable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -32,6 +33,9 @@ public class InsertCommandTest extends ResolverCommandTestBase<InsertCommand.Cal
 
     @Spy
     private OnConflictBuilder mOnConflictBuilder;
+
+    @Mock
+    private ContentValues mReference;
 
     @Test
     public void shouldSetUpdateValues() {
@@ -164,10 +168,25 @@ public class InsertCommandTest extends ResolverCommandTestBase<InsertCommand.Cal
         executionOrder.verify(mUri.buildUpon()).appendQueryParameter(eq(DatabaseContentProvider.PARAM_CONFLICT_ALGORITHM), eq(String.valueOf(expectedOnConflict)));
     }
 
+    @Test
+    public void shouldSetValueBackReference() {
+        final String column = "test";
+        final int index = 4;
+
+        mTested.withValueBackReference(column, index);
+
+        verify(mReference).put(eq(column), eq(index));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void shouldThrowWhenNoColumnForValueBackReference() {
+        mTested.withValueBackReference(null, 0);
+    }
+
     @NonNull
     @Override
     protected InsertCommand createTested(@NonNull BaseResolverCommand.WorkerHandler workerHandler, @NonNull ContentResolver contentResolver) {
-        return new InsertCommand(workerHandler, contentResolver, mContentValuesBuilder, mOnConflictBuilder);
+        return new InsertCommand(workerHandler, contentResolver, mContentValuesBuilder, mOnConflictBuilder, mReference);
     }
 
     @Override
