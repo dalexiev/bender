@@ -66,7 +66,7 @@ public class BatchCommand extends BaseResolverCommand<ContentProviderResult[], B
         Preconditions.argumentNotNull(insert, "Insert can't be null");
 
         final ContentProviderOperation insertOperation = ContentProviderOperation.newInsert(insert.getUri())
-                .withValueBackReferences(insert.getContentValues())
+                .withValueBackReferences(insert.getReference())
                 .withValues(insert.getContentValues())
                 .build();
         mOperations.add(insertOperation);
@@ -84,7 +84,7 @@ public class BatchCommand extends BaseResolverCommand<ContentProviderResult[], B
         Preconditions.argumentNotNull(update, "Update can't be null");
 
         final ContentProviderOperation updateOperation = ContentProviderOperation.newUpdate(update.getUri())
-                .withValueBackReferences(update.getContentValues())
+                .withValueBackReferences(update.getReference())
                 .withValues(update.getContentValues())
                 .withSelection(update.getSelection(), update.getSelectionArgs())
                 .build();
