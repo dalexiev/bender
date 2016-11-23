@@ -63,12 +63,37 @@ public class BatchCommand extends BaseResolverCommand<ContentProviderResult[], B
      * @return the current instance.
      */
     public BatchCommand addInsert(@NonNull InsertCommand insert) {
+        return addInsertInternal(insert, null, 0);
+    }
+
+    /**
+     * Add an insert request to the batch, inserting the result of the previous operation at index
+     * {@code previousResult} in the specified {@code column}.
+     *
+     * @param insert         required. The insert to add.
+     * @param column         required. The column in the table that will host the value of a previous operation from the batch.
+     * @param previousResult the index of the previous operation in the batch, whose result to store in the specified column.
+     * @return the current instance.
+     * @since 1.1.8
+     */
+    public BatchCommand addInsert(@NonNull InsertCommand insert, @NonNull String column, int previousResult) {
+        Preconditions.argumentNotNull(column, "Column can't be null");
+
+        return addInsertInternal(insert, column, previousResult);
+    }
+
+    @NonNull
+    private BatchCommand addInsertInternal(@NonNull InsertCommand insert, String column, int previousResult) {
         Preconditions.argumentNotNull(insert, "Insert can't be null");
 
-        final ContentProviderOperation insertOperation = ContentProviderOperation.newInsert(insert.getUri())
-                .withValues(insert.getContentValues())
-                .build();
-        mOperations.add(insertOperation);
+        final ContentProviderOperation.Builder insertOperation = ContentProviderOperation.newInsert(insert.getUri())
+                .withValues(insert.getContentValues());
+
+        if (column != null) {
+            insertOperation.withValueBackReference(column, previousResult);
+        }
+
+        mOperations.add(insertOperation.build());
 
         return this;
     }
@@ -80,13 +105,36 @@ public class BatchCommand extends BaseResolverCommand<ContentProviderResult[], B
      * @return the current instance.
      */
     public BatchCommand addUpdate(@NonNull UpdateCommand update) {
+        return addUpdateInternal(update, null, 0);
+    }
+
+    /**
+     * Add an update request to the batch, inserting the result of the previous operation at index
+     * {@code previousResult} in the specified {@code column}.
+     *
+     * @param update         required. The update to add.
+     * @param column         required. The column in the table that will host the value of a previous operation from the batch.
+     * @param previousResult the index of the previous operation in the batch, whose result to store in the specified column.
+     * @return the current instance.
+     * @since 1.1.8
+     */
+    public BatchCommand addUpdate(@NonNull UpdateCommand update, @NonNull String column, int previousResult) {
+        return addUpdateInternal(update, column, previousResult);
+    }
+
+    @NonNull
+    private BatchCommand addUpdateInternal(@NonNull UpdateCommand update, String column, int previousResult) {
         Preconditions.argumentNotNull(update, "Update can't be null");
 
-        final ContentProviderOperation updateOperation = ContentProviderOperation.newUpdate(update.getUri())
+        final ContentProviderOperation.Builder updateOperation = ContentProviderOperation.newUpdate(update.getUri())
                 .withValues(update.getContentValues())
-                .withSelection(update.getSelection(), update.getSelectionArgs())
-                .build();
-        mOperations.add(updateOperation);
+                .withSelection(update.getSelection(), update.getSelectionArgs());
+
+        if (column != null) {
+            updateOperation.withValueBackReference(column, previousResult);
+        }
+
+        mOperations.add(updateOperation.build());
 
         return this;
     }
